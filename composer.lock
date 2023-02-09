@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e2bd73d85078e38acea8fc101f5a05a6",
+    "content-hash": "2788233e591cc89a93872e97eac716e2",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1070,6 +1070,59 @@
             "description": "The contracts of Hyperf.",
             "homepage": "https://hyperf.io",
             "keywords": [
+                "hyperf",
+                "php",
+                "swoole"
+            ],
+            "support": {
+                "docs": "https://hyperf.wiki",
+                "issues": "https://github.com/hyperf/hyperf/issues",
+                "pull-request": "https://github.com/hyperf/hyperf/pulls",
+                "source": "https://github.com/hyperf/hyperf"
+            },
+            "time": "2022-05-24T13:10:54+00:00"
+        },
+        {
+            "name": "hyperf/crontab",
+            "version": "v2.2.33",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hyperf/crontab.git",
+                "reference": "64e1a6db961fdf46a111ec172956abb5a386511c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hyperf/crontab/zipball/64e1a6db961fdf46a111ec172956abb5a386511c",
+                "reference": "64e1a6db961fdf46a111ec172956abb5a386511c",
+                "shasum": ""
+            },
+            "require": {
+                "hyperf/utils": "~2.2.0",
+                "nesbot/carbon": "^2.0",
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2-dev"
+                },
+                "hyperf": {
+                    "config": "Hyperf\\Crontab\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hyperf\\Crontab\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A crontab component for Hyperf.",
+            "homepage": "https://hyperf.io",
+            "keywords": [
+                "crontab",
                 "hyperf",
                 "php",
                 "swoole"

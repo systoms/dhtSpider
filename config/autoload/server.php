@@ -16,14 +16,30 @@ use Swoole\Constant;
 return [
     'mode' => SWOOLE_PROCESS,
     'servers' => [
+//        [
+//            'name' => 'http',
+//            'type' => Server::SERVER_HTTP,
+//            'host' => '0.0.0.0',
+//            'port' => 9501,
+//            'sock_type' => SWOOLE_SOCK_TCP,
+//            'callbacks' => [
+//                Event::ON_REQUEST => [Hyperf\HttpServer\Server::class, 'onRequest'],
+//            ],
+//        ],
         [
-            'name' => 'http',
-            'type' => Server::SERVER_HTTP,
+            'name' => 'udp',
+            'type' => Server::SERVER_BASE,
             'host' => '0.0.0.0',
-            'port' => 9501,
-            'sock_type' => SWOOLE_SOCK_TCP,
+            'port' => 9506,
+            'sock_type' => SWOOLE_SOCK_UDP,
             'callbacks' => [
-                Event::ON_REQUEST => [Hyperf\HttpServer\Server::class, 'onRequest'],
+                Event::ON_BEFORE_START => [App\Controller\UdpServer::class, 'onBeforeStart'],
+                Event::ON_WORKER_START => [App\Controller\UdpServer::class, 'onWorkerStart'],
+                Event::ON_PACKET => [App\Controller\UdpServer::class, 'onPacket'],
+                Event::ON_TASK => [App\Controller\UdpServer::class, 'onTask'],
+            ],
+            'settings' => [
+                // 按需配置
             ],
         ],
     ],
