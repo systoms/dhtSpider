@@ -30,7 +30,7 @@ return [
             'name' => 'udp',
             'type' => Server::SERVER_BASE,
             'host' => '0.0.0.0',
-            'port' => 9506,
+            'port' => 6882,
             'sock_type' => SWOOLE_SOCK_UDP,
             'callbacks' => [
                 Event::ON_BEFORE_START => [App\Controller\UdpServer::class, 'onBeforeStart'],

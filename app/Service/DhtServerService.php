@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Lib\BitTorrent\Base;
+use Hyperf\Logger\LoggerFactory;
+use Hyperf\Utils\ApplicationContext;
+use Swoole\Server;
 
 class DhtServerService
 {
@@ -55,13 +58,16 @@ class DhtServerService
 
     public static function send_response($msg, $address)
     {
-        global $serv;
-
         if (!filter_var($address[0], FILTER_VALIDATE_IP)) {
+            echo '不是一个有效的ip',"\n";
             return false;
         }
         $ip = $address[0];
         $data = Base::encode($msg);
-        $serv->sendto($ip, $address[1], $data);
+
+
+        $server = ApplicationContext::getContainer()->get(Server::class);
+        $server->sendto($ip, $address[1], $data);
+        echo 'sendto(ip:',$ip,',address:',$address[1],',data:',$data,"\n";
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Task;
 
-use App\Service\DhtService;
+use App\Service\DhtServerService;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Crontab\Annotation\Crontab;
 use Hyperf\Di\Annotation\Inject;
@@ -26,12 +26,16 @@ class FindNodeTask
             array('router.utorrent.com', 6881)
         );
 
-        if ($table->count() == 0) {
-            DhtService::join_dht($table, $bootstrap_nodes);
-            echo 'join_dht';
-        } else {
-            DhtService::auto_find_node($table, $bootstrap_nodes);
-            echo 'auto_find_node';
+        try {
+            if ($table->count() == 0) {
+                DhtServerService::join_dht($table, $bootstrap_nodes);
+                echo 'join_dht';
+            } else {
+                DhtServerService::auto_find_node($table, $bootstrap_nodes);
+                echo 'auto_find_node';
+            }
+        }catch (\Throwable $throwable){
+            echo $throwable->getMessage(),"\n";
         }
     }
 }

@@ -11,6 +11,7 @@ use App\Service\MetadataService;
 use Hyperf\Contract\OnPacketInterface;
 use Hyperf\Utils\ApplicationContext;
 use Swoole\Server;
+use Swoole\Client;
 use Swoole\Table;
 
 class UdpServer implements OnPacketInterface
@@ -42,6 +43,7 @@ class UdpServer implements OnPacketInterface
             if (!isset($msg['y'])) {
                 return;
             }
+            echo 'onPacket->', $msg['y'], "\n";
             if ($msg['y'] == 'r') {
                 // 如果是回复, 且包含nodes信息 添加到路由表
                 if (array_key_exists('nodes', $msg['r'])) {
@@ -63,8 +65,15 @@ class UdpServer implements OnPacketInterface
     {
         $ip = $data['ip'];
         $port = $data['port'];
+
+
+        echo 'onTask', "\n";
         $infohash = swoole_serialize::unpack($data['infohash']);
-        $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
+//        $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
+
+        $container = ApplicationContext::getContainer();
+        $client = $container->get(Client::class);
+
         if (!@$client->connect($ip, $port, 1)) {
             //echo ("connect failed. Error: {$client->errCode}".PHP_EOL);
         } else {
