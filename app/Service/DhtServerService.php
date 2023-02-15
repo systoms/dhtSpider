@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Lib\BitTorrent\Base;
+use App\Lib\BitTorrent\BitContent;
+use App\Lib\BitTorrent\Node;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\ApplicationContext;
 use Swoole\Server;
+use Swoole\Table;
 
 class DhtServerService
 {
@@ -21,15 +24,14 @@ class DhtServerService
         }
     }
 
-    public static function auto_find_node($table, $bootstrap_nodes)
+    public static function auto_find_node(Table $table, $bootstrap_nodes)
     {
-        $wait = 1.0 / MAX_NODE_SIZE;
-        while (count($table) > 0) {
-            // 从路由表中删除第一个node并返回被删除的node
-            $node = array_shift($table);
-            // 发送查找find_node到node中
-            self::find_node(array($node->ip, $node->port), $node->nid);
-            //  usleep($wait);
+        foreach ($table as $tableNode) {
+            $nid = $tableNode['nid'];
+            $ip = $tableNode['ip'];
+            $port = $tableNode['port'];
+            $table->del(base64_encode($nid));
+            self::find_node(array($ip, $port), $nid);
         }
     }
 
@@ -59,15 +61,16 @@ class DhtServerService
     public static function send_response($msg, $address)
     {
         if (!filter_var($address[0], FILTER_VALIDATE_IP)) {
-            echo '不是一个有效的ip',"\n";
+            echo '不是一个有效的ip', "\n";
             return false;
         }
         $ip = $address[0];
-        $data = Base::encode($msg);
+//        $data = Base::encode($msg);
+        $data = BitContent::encode($msg);
 
 
         $server = ApplicationContext::getContainer()->get(Server::class);
         $server->sendto($ip, $address[1], $data);
-        echo 'sendto(ip:',$ip,',address:',$address[1],',data:',$data,"\n";
+        echo 'sendto(ip:', $ip, ',address:', $address[1], ',data:', $data, ")\n";
     }
 }

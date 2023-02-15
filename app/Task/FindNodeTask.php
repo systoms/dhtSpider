@@ -29,10 +29,10 @@ class FindNodeTask
         try {
             if ($table->count() == 0) {
                 DhtServerService::join_dht($table, $bootstrap_nodes);
-                echo 'join_dht';
+                echo "join_dht\n";
             } else {
                 DhtServerService::auto_find_node($table, $bootstrap_nodes);
-                echo 'auto_find_node';
+                echo "auto_find_node\n";
             }
         }catch (\Throwable $throwable){
             echo $throwable->getMessage(),"\n";

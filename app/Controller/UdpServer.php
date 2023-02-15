@@ -30,7 +30,7 @@ class UdpServer implements OnPacketInterface
 
     public function onWorkerStart($server, $workerId): void
     {
-        var_dump($workerId);
+        echo "启动服务器:",$workerId,"\n";
     }
 
     public function onPacket($server, $data, $clientInfo): void
@@ -68,7 +68,7 @@ class UdpServer implements OnPacketInterface
 
 
         echo 'onTask', "\n";
-        $infohash = swoole_serialize::unpack($data['infohash']);
+        $infohash = unpack($data['infohash']);
 //        $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
 
         $container = ApplicationContext::getContainer();
@@ -82,7 +82,6 @@ class UdpServer implements OnPacketInterface
             if ($rs != false) {
                 //echo $ip.':'.$port.' udp send！'.PHP_EOL;
                 DhtServerService::send_response($rs, array('35.35.35.35', '2345'));
-                echo date('Y-m-d H:i:s') . ' ' . $rs['name'] . PHP_EOL;
             } else {
                 //echo 'false'.date('Y-m-d H:i:s').PHP_EOL;
             }

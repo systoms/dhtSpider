@@ -2,6 +2,8 @@
 
 namespace App\Lib\BitTorrent;
 
+use Carbon\Carbon;
+
 class Base
 {
     /**
@@ -23,8 +25,9 @@ class Base
     {
         $str = '';
 
-        for ($i = 0; $i < $length; $i++)
+        for ($i = 0; $i < $length; $i++) {
             $str .= chr(mt_rand(0, 255));
+        }
 
         return $str;
     }
@@ -50,7 +53,10 @@ class Base
      */
     static public function encode($msg)
     {
-        return Bencode::encode($msg);
+        $encode = new Encode($msg);
+        $encoded = $encode->do_encode();
+        unset($encode);
+        return $encoded;
     }
 
     /**
@@ -60,7 +66,7 @@ class Base
      */
     static public function decode($msg)
     {
-        return Bencode::decode($msg);
+        return Decode::decode($msg);
     }
 
     /**

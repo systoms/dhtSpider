@@ -4,6 +4,9 @@ namespace App\Service;
 
 use App\Lib\BitTorrent\Base;
 use App\Lib\BitTorrent\Node;
+use Hyperf\Utils\ApplicationContext;
+use Swoole\Server;
+use Swoole\Table;
 
 class DhtClientService
 {
@@ -21,7 +24,9 @@ class DhtClientService
      */
     public static function response_action($msg, $address)
     {
-        global $table;
+        $container = ApplicationContext::getContainer();
+        $server = $container->get(Server::class);
+        $table = $server->table;
         // 先检查接收到的信息是否正确
         if (!isset($msg['r']['nodes']) || !isset($msg['r']['nodes'][1])) return;
         // 对nodes数据进行解码
@@ -75,7 +80,10 @@ class DhtClientService
      */
     public static function append($node)
     {
-        global $nid, $table;
+        $container = ApplicationContext::getContainer();
+        $server = $container->get(Server::class);
+        $table = $server->table;
+        $nid = CommonService::getNid();
         // 检查node id是否正确
         if (!isset($node->nid[19]))
             return false;
@@ -85,17 +93,25 @@ class DhtClientService
             return false;
 
         // 检查node是否已存在
-        if (in_array($node, $table))
+        /**
+         * @var Table $table
+         */
+        if ($table->exist(base64_encode($node->nid)))
             return false;
 
         if ($node->port < 1 or $node->port > 65535)
             return false;
 
         // 如果路由表中的项达到200时, 删除第一项
-        if (count($table) >= MAX_NODE_SIZE)
-            array_shift($table);
+        if ($table->count() >= 200){
+            foreach ($table as $tableNode){
+                $table->del(base64_encode($tableNode['nid']));
+                break;
+            }
+        }
 
-        return array_push($table, $node);
+        $table->set(base64_encode($node->nid),['nid'=>$node->nid,'ip'=>$node->ip,'port'=>$node->port]);
+        return $table;
     }
 
     public static function on_ping($msg, $address)
