@@ -9,6 +9,7 @@ use App\Lib\BitTorrent\BitContent;
 use App\Lib\BitTorrent\Node;
 use Hyperf\Logger\LoggerFactory;
 use Hyperf\Utils\ApplicationContext;
+use Swoole\Client;
 use Swoole\Server;
 use Swoole\Table;
 
@@ -37,7 +38,7 @@ class DhtServerService
 
     public static function find_node($address, $id = null)
     {
-        global $nid;
+        $nid = CommonService::getNid();
         if (is_null($id)) {
             $mid = Base::get_node_id();
         } else {
@@ -69,8 +70,9 @@ class DhtServerService
         $data = BitContent::encode($msg);
 
 
-        $server = ApplicationContext::getContainer()->get(Server::class);
-        $server->sendto($ip, $address[1], $data);
+        $client = new Client(SWOOLE_SOCK_UDP);
+        $client->connect($ip, $address[1]);
+        $client->send($data);
         echo 'sendto(ip:', $ip, ',address:', $address[1], ',data:', $data, ")\n";
     }
 }

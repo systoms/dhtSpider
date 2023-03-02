@@ -34,7 +34,7 @@ return [
             'sock_type' => SWOOLE_SOCK_UDP,
             'callbacks' => [
                 Event::ON_BEFORE_START => [App\Controller\UdpServer::class, 'onBeforeStart'],
-                Event::ON_WORKER_START => [App\Controller\UdpServer::class, 'onWorkerStart'],
+//                Event::ON_WORKER_START => [App\Controller\UdpServer::class, 'onWorkerStart'],
                 Event::ON_PACKET => [App\Controller\UdpServer::class, 'onPacket'],
                 Event::ON_TASK => [App\Controller\UdpServer::class, 'onTask'],
             ],

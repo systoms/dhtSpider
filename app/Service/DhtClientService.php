@@ -4,7 +4,9 @@ namespace App\Service;
 
 use App\Lib\BitTorrent\Base;
 use App\Lib\BitTorrent\Node;
+use App\Utils\Log;
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Arr;
 use Swoole\Server;
 use Swoole\Table;
 
@@ -49,22 +51,23 @@ class DhtClientService
      */
     public static function request_action($msg, $address)
     {
+        echo 'type:', Arr::get($msg, 'q', ''), "\n";
         switch ($msg['q']) {
             case 'ping'://确认你是否在线
-                //echo '朋友'.$address[0].'正在确认你是否在线'.PHP_EOL;
+                Log::info('朋友' . $address[0] . '正在确认你是否在线', []);
                 self::on_ping($msg, $address);
                 break;
             case 'find_node': //向服务器发出寻找节点的请求
-                //echo '朋友'.$address[0].'向你发出寻找节点的请求'.PHP_EOL;
+                Log::info('朋友' . $address[0] . '向你发出寻找节点的请求', []);
                 //self::on_find_node($msg, $address);
                 break;
             case 'get_peers':
-                //echo '朋友'.$address[0].'向你发出查找资源的请求'.PHP_EOL;
+                Log::info('朋友' . $address[0] . '向你发出查找资源的请求', ['info_hash' => Arr::get($msg, 'a.info_hash', '')]);
                 // 处理get_peers请求
                 self::on_get_peers($msg, $address);
                 break;
             case 'announce_peer':
-                //echo '朋友' . $address[0] . '找到资源了 通知你一声' . PHP_EOL;
+                Log::info('朋友' . $address[0] . '找到资源了 通知你一声', ['info_hash' => Arr::get($msg, 'a.info_hash', '')]);
                 // 处理announce_peer请求
                 self::on_announce_peer($msg, $address);
                 break;
@@ -78,14 +81,14 @@ class DhtClientService
      * @param Node $node node模型
      * @return boolean       是否添加成功
      */
-    public static function append($node)
+    public static function append(Node $node)
     {
         $container = ApplicationContext::getContainer();
         $server = $container->get(Server::class);
         $table = $server->table;
         $nid = CommonService::getNid();
         // 检查node id是否正确
-        if (!isset($node->nid[19]))
+        if (!isset($node->nid))
             return false;
 
         // 检查是否为自身node id
@@ -103,15 +106,14 @@ class DhtClientService
             return false;
 
         // 如果路由表中的项达到200时, 删除第一项
-        if ($table->count() >= 200){
-            foreach ($table as $tableNode){
+        if ($table->count() >= 200) {
+            foreach ($table as $tableNode) {
                 $table->del(base64_encode($tableNode['nid']));
                 break;
             }
         }
 
-        $table->set(base64_encode($node->nid),['nid'=>$node->nid,'ip'=>$node->ip,'port'=>$node->port]);
-        return $table;
+        $table->set(base64_encode($node->nid), ['nid' => $node->nid, 'ip' => $node->ip, 'port' => $node->port]);
     }
 
     public static function on_ping($msg, $address)
@@ -164,7 +166,7 @@ class DhtClientService
      */
     public static function on_get_peers($msg, $address)
     {
-        global $nid;
+        $nid = CommonService::getNid();
 
         // 获取info_hash信息
         $infohash = $msg['a']['info_hash'];
@@ -197,7 +199,8 @@ class DhtClientService
      */
     public static function on_announce_peer($msg, $address)
     {
-        global $nid, $config, $serv, $task_num;
+        $nid = CommonService::getNid();
+//        global $nid, $config, $serv, $task_num;
         $infohash = $msg['a']['info_hash'];
         $port = $msg['a']['port'];
         $token = $msg['a']['token'];
@@ -235,7 +238,9 @@ class DhtClientService
         // 发送请求回复
         DhtServerService::send_response($msg, $address);
 
-        $task_id = $serv->task(array('ip' => $ip, 'port' => $port, 'infohash' => swoole_serialize::pack($infohash)));
+        $container = ApplicationContext::getContainer();
+        $server = $container->get(Server::class);
+        $server->task(array('ip' => $ip, 'port' => $port, 'infohash' => \Swoole\WebSocket\Server::pack($infohash)));
         //echo "Dispath AsyncTask: [id=$task_id]\n";
         return;
     }

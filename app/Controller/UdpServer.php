@@ -19,18 +19,13 @@ class UdpServer implements OnPacketInterface
     public function onBeforeStart()
     {
         $table = new Table(65536);
-        $table->column('fd', Table::TYPE_INT);
-        $table->column('reactor_id', Table::TYPE_INT);
-        $table->column('data', Table::TYPE_STRING, 64);
+        $table->column('nid', Table::TYPE_STRING,100);
+        $table->column('ip', Table::TYPE_STRING,20);
+        $table->column('port', Table::TYPE_INT);
         $table->create();
         $container = ApplicationContext::getContainer();
         $server = $container->get(Server::class);
         $server->table = $table;
-    }
-
-    public function onWorkerStart($server, $workerId): void
-    {
-        echo "启动服务器:",$workerId,"\n";
     }
 
     public function onPacket($server, $data, $clientInfo): void
@@ -43,7 +38,7 @@ class UdpServer implements OnPacketInterface
             if (!isset($msg['y'])) {
                 return;
             }
-            echo 'onPacket->', $msg['y'], "\n";
+//            echo 'onPacket->', $msg['y'], "\n";
             if ($msg['y'] == 'r') {
                 // 如果是回复, 且包含nodes信息 添加到路由表
                 if (array_key_exists('nodes', $msg['r'])) {
@@ -68,7 +63,7 @@ class UdpServer implements OnPacketInterface
 
 
         echo 'onTask', "\n";
-        $infohash = unpack($data['infohash']);
+        $infohash = \Swoole\WebSocket\Server::unpack($data['infohash']);
 //        $client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
 
         $container = ApplicationContext::getContainer();
